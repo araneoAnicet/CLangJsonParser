@@ -12,7 +12,7 @@ int push_json_stack(struct json* json, char element) {
     return 0;
 }
 
-int serialize_string(struct json* json, struct json_key_value_pair* pair) {
+int serialize_key(struct json* json, struct json_key_value_pair* pair) {
     int i;
     CHECK(push_json_stack(json, '\"'));
 
@@ -21,13 +21,29 @@ int serialize_string(struct json* json, struct json_key_value_pair* pair) {
     }
     CHECK(push_json_stack(json, '\"'));
     CHECK(push_json_stack(json, ':'));
+    return 0;
+}
 
+int serialize_string(struct json* json, struct json_key_value_pair* pair) {
+    CHECK(serialize_key(json, pair));
     CHECK(push_json_stack(json, '\"'));
-
+    int i;
     for (i = 0; i < pair->value.string.length; i++) {
         CHECK(push_json_stack(json, pair->value.string.value[i]));
     }
     CHECK(push_json_stack(json, '\"'));
+    return 0;
+}
+
+int serialize_number(struct json* json, struct json_key_value_pair* pair) {
+    CHECK(serialize_key(json, pair));
+    char char_buffer[12];
+    sprintf(char_buffer, "%d", pair->value.number.value);
+    int i = 0;
+    while (char_buffer[i] != '\0') {
+        CHECK(push_json_stack(json, char_buffer[i]));
+        i++;
+    }
     return 0;
 }
 
@@ -36,16 +52,35 @@ int serialize_object(struct json* json, struct json_object* object) {
     CHECK(push_json_stack(json, '{'));
 
     for (pair_index = 0; pair_index < object->number_of_key_value_pairs - 1; pair_index++) {
-        if (object->key_value_pairs[pair_index].type == string) {
+        
+        switch (object->key_value_pairs[pair_index].type) {
+        case string:
             CHECK(serialize_string(json, &(object->key_value_pairs[pair_index])));
+            break;
+        
+        case number:
+            CHECK(serialize_number(json, &(object->key_value_pairs[pair_index])));
+            break;
+
+        default:
+            break;
         }
+        
         CHECK(push_json_stack(json, ','));
     }
 
-    if (object->key_value_pairs[object->number_of_key_value_pairs - 1].type == string) {
-        CHECK(serialize_string(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
-    }
+    switch (object->key_value_pairs[object->number_of_key_value_pairs - 1].type) {
+        case string:
+            CHECK(serialize_string(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
+            break;
+        
+        case number:
+            CHECK(serialize_number(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
+            break;
 
+        default:
+            break;
+        }
     CHECK(push_json_stack(json, '}'));
     return 0;
 }

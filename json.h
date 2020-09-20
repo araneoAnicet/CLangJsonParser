@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "error_handler.h"
 
 
@@ -83,6 +84,7 @@ struct json {
 };
 
 int push_json_stack(struct json* json, char element);
+int serialize_key(struct json* json, struct json_key_value_pair* pair);
 int serialize_json(struct json* json);
 int serialize_object(struct json* json, struct json_object* object);
 int serialize_string(struct json* json, struct json_key_value_pair* pair);
