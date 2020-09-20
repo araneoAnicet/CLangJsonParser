@@ -14,62 +14,39 @@ int push_json_stack(struct json* json, char element) {
 
 int serialize_string(struct json* json, struct json_key_value_pair* pair) {
     int i;
-    if (push_json_stack(json, '\"') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '\"'));
 
     for (i = 0; i < pair->key_length; i++) {
-        if (push_json_stack(json, pair->key[i]) == -1) {
-            return -1;
-        }
+        CHECK(push_json_stack(json, pair->key[i]));
     }
-    if (push_json_stack(json, '\"') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '\"'));
+    CHECK(push_json_stack(json, ':'));
 
-    if (push_json_stack(json, ':') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '\"'));
 
-
-    if (push_json_stack(json, '\"') == -1) {
-        return -1;
-    }
     for (i = 0; i < pair->value.string.length; i++) {
-        if (push_json_stack(json, pair->value.string.value[i]) == -1) {
-            return -1;
-        }
+        CHECK(push_json_stack(json, pair->value.string.value[i]));
     }
-    if (push_json_stack(json, '\"') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '\"'));
     return 0;
 }
 
 int serialize_object(struct json* json, struct json_object* object) {
     int pair_index;
-    if (push_json_stack(json, '{') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '{'));
 
     for (pair_index = 0; pair_index < object->number_of_key_value_pairs - 1; pair_index++) {
         if (object->key_value_pairs[pair_index].type == string) {
-            if (serialize_string(json, &(object->key_value_pairs[pair_index])) == -1) {
-                return -1;
-            }
+            CHECK(serialize_string(json, &(object->key_value_pairs[pair_index])));
         }
-        push_json_stack(json, ',');
+        CHECK(push_json_stack(json, ','));
     }
 
     if (object->key_value_pairs[object->number_of_key_value_pairs - 1].type == string) {
-        if (serialize_string(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])) == -1) {
-            return -1;
-        }
+        CHECK(serialize_string(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
     }
 
-    if (push_json_stack(json, '}') == -1) {
-        return -1;
-    }
+    CHECK(push_json_stack(json, '}'));
     return 0;
 }
 
@@ -77,16 +54,14 @@ int save_json(struct json* json, FILE* fd) {
     int i;
     struct json_char_stack_node* temp_node = json->char_stack.root.next;
     for (i = 0; i < json->char_stack.length - 1; i++) {
-        fprintf(fd, "%c", temp_node->value);
-        printf("%c\n", temp_node->value);
+        CHECK(fprintf(fd, "%c", temp_node->value));
+        CHECK(printf("%c\n", temp_node->value));
         temp_node = temp_node->next;
     }
     return 0;
 }
 
 int serialize_json(struct json* json) {
-    if (serialize_object(json, json->root_object) == -1) {
-        return -1;
-    }
+    CHECK(serialize_object(json, json->root_object));
     return 0;
 }

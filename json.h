@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "error_handler.h"
 
 
 struct json_string;
