@@ -89,7 +89,7 @@ int serialize_json(struct json* json);
 int serialize_object(struct json* json, struct json_object* object);
 int serialize_string(struct json* json, struct json_key_value_pair* pair);
 int serialize_number(struct json* json, struct json_key_value_pair* pair);
-int serialize_null(struct json*);
+int serialize_null(struct json* json, struct json_key_value_pair* pair);
 int serialize_array(struct json* json, struct json_array* array);
 int serialize_boolean(struct json* json, struct json_key_value_pair* pair);
 int save_json(struct json* json, FILE* fd);

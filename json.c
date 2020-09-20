@@ -47,6 +47,16 @@ int serialize_number(struct json* json, struct json_key_value_pair* pair) {
     return 0;
 }
 
+int serialize_null(struct json* json, struct json_key_value_pair* pair) {
+    CHECK(serialize_key(json, pair));
+    int i;
+    const char* null_str = "null";
+    for (i = 0; i < 4; i++) {
+        CHECK(push_json_stack(json, null_str[i]));
+    }
+    return 0;
+}
+
 int serialize_object(struct json* json, struct json_object* object) {
     int pair_index;
     CHECK(push_json_stack(json, '{'));
@@ -61,6 +71,9 @@ int serialize_object(struct json* json, struct json_object* object) {
         case number:
             CHECK(serialize_number(json, &(object->key_value_pairs[pair_index])));
             break;
+
+        case null:
+            CHECK(serialize_null(json, &(object->key_value_pairs[pair_index])));
 
         default:
             break;
@@ -77,6 +90,10 @@ int serialize_object(struct json* json, struct json_object* object) {
         case number:
             CHECK(serialize_number(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
             break;
+
+        case null:
+            CHECK(serialize_null(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
+
 
         default:
             break;
