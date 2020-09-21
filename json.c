@@ -9,6 +9,7 @@ int push_json_stack(struct json* json, char element) {
     json->char_stack.top->next = node;
     json->char_stack.top = node;
     json->char_stack.length++;
+    printf("Pushed: %c\n", element);
     return 0;
 }
 
@@ -57,6 +58,23 @@ int serialize_null(struct json* json, struct json_key_value_pair* pair) {
     return 0;
 }
 
+int serialize_boolean(struct json* json, struct json_key_value_pair* pair) {
+    CHECK(serialize_key(json, pair));
+    const char* char_buffer_true = "true";
+    const char* char_buffer_false = "false";
+    int i;
+    if (pair->value.boolean.value) {
+        for (i = 0; i < 4; i++) {
+            CHECK(push_json_stack(json, char_buffer_true[i]));
+        }
+    } else {
+        for (i = 0; i < 5; i++) {
+            CHECK(push_json_stack(json, char_buffer_false[i]));
+        }
+    }
+    return 0;
+}
+
 int serialize_object(struct json* json, struct json_object* object) {
     int pair_index;
     CHECK(push_json_stack(json, '{'));
@@ -74,6 +92,10 @@ int serialize_object(struct json* json, struct json_object* object) {
 
         case null:
             CHECK(serialize_null(json, &(object->key_value_pairs[pair_index])));
+
+        case boolean:
+            CHECK(serialize_boolean(json, &(object->key_value_pairs[pair_index])));
+            break;
 
         default:
             break;
@@ -94,6 +116,9 @@ int serialize_object(struct json* json, struct json_object* object) {
         case null:
             CHECK(serialize_null(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
 
+        case boolean:
+            CHECK(serialize_boolean(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
+            break;
 
         default:
             break;
@@ -106,8 +131,7 @@ int save_json(struct json* json, FILE* fd) {
     int i;
     struct json_char_stack_node* temp_node = json->char_stack.root.next;
     for (i = 0; i < json->char_stack.length - 1; i++) {
-        CHECK(fprintf(fd, "%c", temp_node->value));
-        CHECK(printf("%c\n", temp_node->value));
+        fprintf(fd, "%c", temp_node->value);
         temp_node = temp_node->next;
     }
     return 0;
