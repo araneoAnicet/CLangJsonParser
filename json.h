@@ -62,7 +62,7 @@ struct json_object {
 };
 
 struct json_array {
-    struct json_object* objects;
+    struct json_object** objects;
     int length;
 };
 

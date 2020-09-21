@@ -74,6 +74,17 @@ int serialize_boolean(struct json* json, struct json_key_value_pair* pair) {
     }
     return 0;
 }
+int serialize_array(struct json* json, struct json_array* array) {
+    CHECK(push_json_stack(json, '['));
+    int i;
+    for (i = 0; i < array->length - 1; i++) {
+        CHECK(serialize_object(json, array->objects[i]));
+        CHECK(push_json_stack(json, ','));
+    }
+    CHECK(serialize_object(json, array->objects[array->length - 1]));
+    CHECK(push_json_stack(json, ']'));
+    return 0;
+}
 
 int serialize_object(struct json* json, struct json_object* object) {
     int pair_index;
@@ -97,6 +108,10 @@ int serialize_object(struct json* json, struct json_object* object) {
             CHECK(serialize_boolean(json, &(object->key_value_pairs[pair_index])));
             break;
 
+        case array:
+            CHECK(serialize_array(json, &(object->key_value_pairs[pair_index])));
+            break;
+
         default:
             break;
         }
@@ -118,6 +133,10 @@ int serialize_object(struct json* json, struct json_object* object) {
 
         case boolean:
             CHECK(serialize_boolean(json, &(object->key_value_pairs[object->number_of_key_value_pairs - 1])));
+            break;
+
+        case array:
+            CHECK(serialize_array(json, &(object->key_value_pairs[pair_index])));
             break;
 
         default:
